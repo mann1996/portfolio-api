@@ -1,5 +1,6 @@
 package com.portfolio.api.entity;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,7 +10,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -26,8 +29,39 @@ public class User {
 	@Column(unique = true)
 	private String email;
 	private String password;
+	private LocalDateTime joinedOn = LocalDateTime.now();
+
 	@OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
 	private Set<Post> posts = new HashSet<>();
+
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "user_id", unique = true)
+	private Profile profileId;
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @return the firstName
+	 */
+	public String getFirstName() {
+		return firstName;
+	}
+
+	/**
+	 * @return the id
+	 */
+	public Integer getId() {
+		return id;
+	}
+
+	public LocalDateTime getJoinedOn() {
+		return joinedOn;
+	}
 
 //	@ManyToMany(fetch = FetchType.LAZY)
 //	@JoinTable(name = "user_skill", joinColumns = {
@@ -36,17 +70,17 @@ public class User {
 //	private Set<Skill> skills = new HashSet<>();
 
 	/**
-	 * @return the posts
+	 * @return the lastName
 	 */
-	public Set<Post> getPosts() {
-		return posts;
+	public String getLastName() {
+		return lastName;
 	}
 
 	/**
-	 * @param posts the posts to set
+	 * @return the password
 	 */
-	public void setPosts(Set<Post> posts) {
-		this.posts = posts;
+	public String getPassword() {
+		return password;
 	}
 
 	/**
@@ -64,52 +98,14 @@ public class User {
 //	}
 
 	/**
-	 * @return the id
+	 * @return the posts
 	 */
-	public Integer getId() {
-		return id;
+	public Set<Post> getPosts() {
+		return posts;
 	}
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return the firstName
-	 */
-	public String getFirstName() {
-		return firstName;
-	}
-
-	/**
-	 * @param firstName the firstName to set
-	 */
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	/**
-	 * @return the lastName
-	 */
-	public String getLastName() {
-		return lastName;
-	}
-
-	/**
-	 * @param lastName the lastName to set
-	 */
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	/**
-	 * @return the email
-	 */
-	public String getEmail() {
-		return email;
+	public Profile getProfileId() {
+		return profileId;
 	}
 
 	/**
@@ -120,10 +116,28 @@ public class User {
 	}
 
 	/**
-	 * @return the password
+	 * @param firstName the firstName to set
 	 */
-	public String getPassword() {
-		return password;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public void setJoinedOn(LocalDateTime joinedOn) {
+		this.joinedOn = joinedOn;
+	}
+
+	/**
+	 * @param lastName the lastName to set
+	 */
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	/**
@@ -131,6 +145,17 @@ public class User {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	/**
+	 * @param posts the posts to set
+	 */
+	public void setPosts(Set<Post> posts) {
+		this.posts = posts;
+	}
+
+	public void setProfileId(Profile profileId) {
+		this.profileId = profileId;
 	}
 
 }

@@ -1,17 +1,9 @@
-package com.portfolio.api.entity;
+package com.portfolio.api.dto;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import org.springframework.stereotype.Component;
 
-@Entity(name = "profile")
-public class Profile {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+@Component
+public class ProfileDto {
 	private Integer id;
 	private String jobTitle;
 	private String company;
@@ -25,10 +17,15 @@ public class Profile {
 	private String telegram;
 	private String soundcloud;
 	private String flickr;
+	private CityDto location;
 
-	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "location")
-	private City location;
+	public CityDto getLocation() {
+		return location;
+	}
+
+	public void setLocation(CityDto location) {
+		this.location = location;
+	}
 
 	public Integer getId() {
 		return id;
@@ -132,13 +129,5 @@ public class Profile {
 
 	public void setFlickr(String flickr) {
 		this.flickr = flickr;
-	}
-
-	public City getLocation() {
-		return location;
-	}
-
-	public void setLocation(City location) {
-		this.location = location;
 	}
 }
