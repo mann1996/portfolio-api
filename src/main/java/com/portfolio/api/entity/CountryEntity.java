@@ -1,22 +1,18 @@
 package com.portfolio.api.entity;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
-@Entity(name = "cities")
-public class City {
+@Entity(name = "countries")
+public class CountryEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+	private String sortname;
 	private String name;
-	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "state_id")
-	private State state;
+	private Integer phonecode;
 
 	public Integer getId() {
 		return id;
@@ -24,6 +20,14 @@ public class City {
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public String getSortname() {
+		return sortname;
+	}
+
+	public void setSortname(String sortname) {
+		this.sortname = sortname;
 	}
 
 	public String getName() {
@@ -34,11 +38,11 @@ public class City {
 		this.name = name;
 	}
 
-	public State getState() {
-		return state;
+	public Integer getPhonecode() {
+		return phonecode;
 	}
 
-	public void setState(State state) {
-		this.state = state;
+	public void setPhonecode(Integer phonecode) {
+		this.phonecode = phonecode;
 	}
 }

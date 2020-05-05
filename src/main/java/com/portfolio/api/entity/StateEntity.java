@@ -9,14 +9,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity(name = "states")
-public class State {
+public class StateEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	private String name;
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "country_id")
-	private Country country;
+	private CountryEntity country;
 
 	public Integer getId() {
 		return id;
@@ -34,11 +34,11 @@ public class State {
 		this.name = name;
 	}
 
-	public Country getCountry() {
+	public CountryEntity getCountry() {
 		return country;
 	}
 
-	public void setCountry(Country country) {
+	public void setCountry(CountryEntity country) {
 		this.country = country;
 	}
 }

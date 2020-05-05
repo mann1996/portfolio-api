@@ -11,7 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity(name = "post")
-public class Post {
+public class PostEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -26,7 +26,7 @@ public class Post {
 	private LocalDateTime updatedAt = LocalDateTime.now();
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "createdBy")
-	private User createdBy;
+	private UserEntity createdBy;
 //	@ManyToMany(fetch = FetchType.LAZY)
 //	@JoinTable(name = "post_keyword", joinColumns = {
 //			@JoinColumn(name = "post_id", referencedColumnName = "id", nullable = false, updatable = false) }, inverseJoinColumns = {
@@ -105,11 +105,11 @@ public class Post {
 		this.updatedAt = updatedAt;
 	}
 
-	public User getCreatedBy() {
+	public UserEntity getCreatedBy() {
 		return createdBy;
 	}
 
-	public void setCreatedBy(User createdBy) {
+	public void setCreatedBy(UserEntity createdBy) {
 		this.createdBy = createdBy;
 	}
 

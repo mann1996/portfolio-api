@@ -1,10 +1,18 @@
 package com.portfolio.api.dto;
 
+import java.io.Serializable;
+
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProfileDto {
+public class ProfileDto implements Serializable {
+
+	private static final long serialVersionUID = 4296243734888685839L;
+
 	private Integer id;
+	private String publicId;
+	private String firstName;
+	private String lastName;
 	private String jobTitle;
 	private String company;
 	private String website;
@@ -18,6 +26,23 @@ public class ProfileDto {
 	private String soundcloud;
 	private String flickr;
 	private CityDto location;
+	private UserDto user;
+
+	public String getPublicId() {
+		return publicId;
+	}
+
+	public void setPublicId(String publicId) {
+		this.publicId = publicId;
+	}
+
+	public UserDto getUser() {
+		return user;
+	}
+
+	public void setUser(UserDto user) {
+		this.user = user;
+	}
 
 	public CityDto getLocation() {
 		return location;
@@ -33,6 +58,22 @@ public class ProfileDto {
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	public String getJobTitle() {

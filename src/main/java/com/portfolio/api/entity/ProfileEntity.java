@@ -1,5 +1,7 @@
 package com.portfolio.api.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -7,12 +9,19 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 @Entity(name = "profile")
-public class Profile {
+public class ProfileEntity implements Serializable {
+
+	private static final long serialVersionUID = 4767746605850858850L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+	private String publicId;
+	private String firstName;
+	private String lastName;
 	private String jobTitle;
 	private String company;
 	private String website;
@@ -28,7 +37,43 @@ public class Profile {
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "location")
-	private City location;
+	private CityEntity location;
+
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "user_id", nullable = false, unique = true)
+	private UserEntity user;
+
+	public String getPublicId() {
+		return publicId;
+	}
+
+	public void setPublicId(String publicId) {
+		this.publicId = publicId;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public UserEntity getUser() {
+		return user;
+	}
+
+	public void setUser(UserEntity user) {
+		this.user = user;
+	}
 
 	public Integer getId() {
 		return id;
@@ -134,11 +179,11 @@ public class Profile {
 		this.flickr = flickr;
 	}
 
-	public City getLocation() {
+	public CityEntity getLocation() {
 		return location;
 	}
 
-	public void setLocation(City location) {
+	public void setLocation(CityEntity location) {
 		this.location = location;
 	}
 }

@@ -12,7 +12,12 @@ public class LogingUtility {
 	private Logger logger = LogManager.getLogger(this.getClass());
 
 	@AfterThrowing(pointcut = "execution(* com.portfolio.api.service.*Impl.*(..))", throwing = "ex")
-	public void logService(Exception ex) throws Exception {
+	public void logServiceErrors(Exception ex) throws Exception {
+		logger.error(ex);
+	}
+
+	@AfterThrowing(pointcut = "execution(* com.portfolio.api.repository*.*(..))", throwing = "ex")
+	public void logRepositoryErrors(Exception ex) throws Exception {
 		logger.error(ex);
 	}
 }

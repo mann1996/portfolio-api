@@ -1,73 +1,86 @@
 package com.portfolio.api.dto;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserDto {
+public class UserDto implements Serializable {
+
+	private static final long serialVersionUID = 2868739908925042014L;
+
 	private Integer id;
+	private String publicId;
 	private String firstName;
 	private String lastName;
 	private String email;
 	private String password;
-	private LocalDateTime joinedOn;
-	private ProfileDto profile;
+	private String encryptedPassword;
+	private LocalDateTime joinedOn = LocalDateTime.now();
 
-//	private Set<SkillDto> skills;
-	public Integer getId() {
-		return id;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setId(Integer id) {
-		this.id = id;
+	public String getEncryptedPassword() {
+		return encryptedPassword;
 	}
 
 	public String getFirstName() {
 		return firstName;
 	}
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
+	// private Set<SkillDto> skills;
+	public Integer getId() {
+		return id;
 	}
 
 	public LocalDateTime getJoinedOn() {
 		return joinedOn;
 	}
 
+	public String getLastName() {
+		return lastName;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public String getPublicId() {
+		return publicId;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setEncryptedPassword(String encryptedPassword) {
+		this.encryptedPassword = encryptedPassword;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
 	public void setJoinedOn(LocalDateTime joinedOn) {
 		this.joinedOn = joinedOn;
 	}
 
-	public ProfileDto getProfile() {
-		return profile;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
-	public void setProfile(ProfileDto profile) {
-		this.profile = profile;
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public void setPublicId(String publicId) {
+		this.publicId = publicId;
 	}
 }
