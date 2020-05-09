@@ -1,7 +1,6 @@
 package com.portfolio.api.entity;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +10,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -32,10 +34,31 @@ public class UserEntity implements Serializable {
 	private String email;
 	@Column(name = "password")
 	private String encryptedPassword;
-	private LocalDateTime joinedOn = LocalDateTime.now();
 
 	@OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
 	private Set<PostEntity> posts = new HashSet<>();
+
+	@ManyToMany(mappedBy = "following")
+	private Set<UserEntity> followers = new HashSet<UserEntity>();
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "user_following", joinColumns = @JoinColumn(name = "follower_user_id"), inverseJoinColumns = @JoinColumn(name = "following_user_id"))
+	private Set<UserEntity> following = new HashSet<UserEntity>();
+
+	public Set<UserEntity> getFollowers() {
+		return followers;
+	}
+
+	public void setFollowers(Set<UserEntity> followers) {
+		this.followers = followers;
+	}
+
+	public Set<UserEntity> getFollowing() {
+		return following;
+	}
+
+	public void setFollowing(Set<UserEntity> following) {
+		this.following = following;
+	}
 
 	public Integer getId() {
 		return id;
@@ -83,14 +106,6 @@ public class UserEntity implements Serializable {
 
 	public void setEncryptedPassword(String encryptedPassword) {
 		this.encryptedPassword = encryptedPassword;
-	}
-
-	public LocalDateTime getJoinedOn() {
-		return joinedOn;
-	}
-
-	public void setJoinedOn(LocalDateTime joinedOn) {
-		this.joinedOn = joinedOn;
 	}
 
 	public Set<PostEntity> getPosts() {

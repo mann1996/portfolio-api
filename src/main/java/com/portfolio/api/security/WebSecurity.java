@@ -1,5 +1,8 @@
 package com.portfolio.api.security;
 
+import java.util.Arrays;
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,6 +10,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.portfolio.api.service.UserService;
 
@@ -23,8 +29,11 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().authorizeRequests().antMatchers(HttpMethod.POST, WebSecurityConstants.SIGNUP_URL)
-				.permitAll().anyRequest().authenticated().and().addFilter(this.getAuthenticationFilter())
+		http.cors().and().csrf().disable().authorizeRequests()
+				.antMatchers(HttpMethod.POST, WebSecurityConstants.SIGNUP_URL).permitAll()
+				.antMatchers(HttpMethod.POST, "/users/validate").permitAll()
+				.antMatchers(HttpMethod.GET, WebSecurityConstants.PROFILE_URL).permitAll().anyRequest().authenticated()
+				.and().addFilter(this.getAuthenticationFilter())
 				.addFilter(new AuthorizationFilter(authenticationManager())).sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 	}
@@ -36,7 +45,21 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
 	public AuthenticationFilter getAuthenticationFilter() throws Exception {
 		final AuthenticationFilter filter = new AuthenticationFilter(authenticationManager());
-		filter.setFilterProcessesUrl("/login");
+		filter.setFilterProcessesUrl("/users/login");
 		return filter;
+	}
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		final CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList("*"));
+		configuration.setAllowedMethods(Arrays.asList("*"));
+		configuration.setAllowCredentials(true);
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+		configuration.setExposedHeaders(Arrays.asList("Authorization", "UserId"));
+
+		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
 	}
 }

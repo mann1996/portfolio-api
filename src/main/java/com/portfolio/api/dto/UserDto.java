@@ -1,7 +1,6 @@
 package com.portfolio.api.dto;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,6 @@ public class UserDto implements Serializable {
 	private String email;
 	private String password;
 	private String encryptedPassword;
-	private LocalDateTime joinedOn = LocalDateTime.now();
 
 	public String getEmail() {
 		return email;
@@ -34,10 +32,6 @@ public class UserDto implements Serializable {
 	// private Set<SkillDto> skills;
 	public Integer getId() {
 		return id;
-	}
-
-	public LocalDateTime getJoinedOn() {
-		return joinedOn;
 	}
 
 	public String getLastName() {
@@ -66,10 +60,6 @@ public class UserDto implements Serializable {
 
 	public void setId(Integer id) {
 		this.id = id;
-	}
-
-	public void setJoinedOn(LocalDateTime joinedOn) {
-		this.joinedOn = joinedOn;
 	}
 
 	public void setLastName(String lastName) {

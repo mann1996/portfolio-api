@@ -1,9 +1,13 @@
 package com.portfolio.api.dto;
 
+import java.io.Serializable;
+
 import org.springframework.stereotype.Component;
 
 @Component
-public class StateDto {
+public class StateDto implements Serializable {
+
+	private static final long serialVersionUID = 1266261198182095420L;
 	private Integer id;
 	private String name;
 	private CountryDto country;

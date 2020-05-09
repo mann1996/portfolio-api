@@ -1,6 +1,7 @@
 package com.portfolio.api.dto;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Component;
 
@@ -22,11 +23,28 @@ public class ProfileDto implements Serializable {
 	private String facebook;
 	private String twitter;
 	private String youtube;
-	private String telegram;
 	private String soundcloud;
-	private String flickr;
-	private CityDto location;
+	private String github;
+	private String linkedin;
+//	private CityDto location;
+	private LocalDateTime joinedOn = LocalDateTime.now();
 	private UserDto user;
+
+	public String getLinkedin() {
+		return linkedin;
+	}
+
+	public void setLinkedin(String linkedin) {
+		this.linkedin = linkedin;
+	}
+
+	public LocalDateTime getJoinedOn() {
+		return joinedOn;
+	}
+
+	public void setJoinedOn(LocalDateTime joinedOn) {
+		this.joinedOn = joinedOn;
+	}
 
 	public String getPublicId() {
 		return publicId;
@@ -42,14 +60,6 @@ public class ProfileDto implements Serializable {
 
 	public void setUser(UserDto user) {
 		this.user = user;
-	}
-
-	public CityDto getLocation() {
-		return location;
-	}
-
-	public void setLocation(CityDto location) {
-		this.location = location;
 	}
 
 	public Integer getId() {
@@ -148,14 +158,6 @@ public class ProfileDto implements Serializable {
 		this.youtube = youtube;
 	}
 
-	public String getTelegram() {
-		return telegram;
-	}
-
-	public void setTelegram(String telegram) {
-		this.telegram = telegram;
-	}
-
 	public String getSoundcloud() {
 		return soundcloud;
 	}
@@ -164,11 +166,11 @@ public class ProfileDto implements Serializable {
 		this.soundcloud = soundcloud;
 	}
 
-	public String getFlickr() {
-		return flickr;
+	public String getGithub() {
+		return github;
 	}
 
-	public void setFlickr(String flickr) {
-		this.flickr = flickr;
+	public void setGithub(String github) {
+		this.github = github;
 	}
 }

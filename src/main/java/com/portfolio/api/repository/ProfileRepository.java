@@ -7,5 +7,6 @@ import com.portfolio.api.entity.ProfileEntity;
 
 @Repository
 public interface ProfileRepository extends JpaRepository<ProfileEntity, Integer> {
+	public ProfileEntity findByPublicId(String id);
 
 }

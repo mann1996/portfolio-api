@@ -1,24 +1,8 @@
-package com.portfolio.api.entity;
+package com.portfolio.api.ui.response;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-
-@Entity(name = "profile")
-public class ProfileEntity implements Serializable {
-
-	private static final long serialVersionUID = 4767746605850858850L;
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+public class ProfileRest {
 	private String publicId;
 	private String firstName;
 	private String lastName;
@@ -34,15 +18,11 @@ public class ProfileEntity implements Serializable {
 	private String soundcloud;
 	private String github;
 	private String linkedin;
+
 	private LocalDateTime joinedOn = LocalDateTime.now();
-
-//	@ManyToOne(cascade = CascadeType.ALL)
-//	@JoinColumn(name = "location")
-//	private CityEntity location;
-
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "user_id", nullable = false, unique = true)
-	private UserEntity user;
+	private UserRest user;
+	private boolean valid = false;
+	private boolean followingStatus;
 
 	public String getLinkedin() {
 		return linkedin;
@@ -52,12 +32,20 @@ public class ProfileEntity implements Serializable {
 		this.linkedin = linkedin;
 	}
 
-	public Integer getId() {
-		return id;
+	public LocalDateTime getJoinedOn() {
+		return joinedOn;
 	}
 
-	public void setId(Integer id) {
-		this.id = id;
+	public void setJoinedOn(LocalDateTime joinedOn) {
+		this.joinedOn = joinedOn;
+	}
+
+	public boolean isValid() {
+		return valid;
+	}
+
+	public void setValid(boolean valid) {
+		this.valid = valid;
 	}
 
 	public String getPublicId() {
@@ -172,20 +160,20 @@ public class ProfileEntity implements Serializable {
 		this.github = github;
 	}
 
-	public LocalDateTime getJoinedOn() {
-		return joinedOn;
-	}
-
-	public void setJoinedOn(LocalDateTime joinedOn) {
-		this.joinedOn = joinedOn;
-	}
-
-	public UserEntity getUser() {
+	public UserRest getUser() {
 		return user;
 	}
 
-	public void setUser(UserEntity user) {
+	public void setUser(UserRest user) {
 		this.user = user;
+	}
+
+	public boolean isFollowingStatus() {
+		return followingStatus;
+	}
+
+	public void setFollowingStatus(boolean followingStatus) {
+		this.followingStatus = followingStatus;
 	}
 
 }

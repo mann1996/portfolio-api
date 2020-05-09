@@ -5,7 +5,8 @@ public class WebSecurityConstants {
 	public static final String TOKEN_PREFIX = "Bearer ";
 	public static final String HEADER_STRING = "Authorization";
 	public static final String SIGNUP_URL = "/users/create";
-	public static final String SHOW_URL = "/users/show";
+	public static final String SHOW_URL = "/users/show/**";
 	public static final String LOGIN_URL = "/users/login";
+	public static final String PROFILE_URL = "/users/profile/**";
 	public static final String TOKEN_SECRET = "6muc3b2kzq0e";
 }

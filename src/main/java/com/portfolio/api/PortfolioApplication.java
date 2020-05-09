@@ -5,6 +5,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
+
 @SpringBootApplication
 public class PortfolioApplication {
 
@@ -20,6 +24,15 @@ public class PortfolioApplication {
 	@Bean
 	public SpringApplicationContext applicationContext() {
 		return new SpringApplicationContext();
+	}
+
+	@Bean
+	public ObjectMapper objectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JSR353Module());
+		objectMapper.registerModule(new JavaTimeModule());
+
+		return objectMapper;
 	}
 
 }

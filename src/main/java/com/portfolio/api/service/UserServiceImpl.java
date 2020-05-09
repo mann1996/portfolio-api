@@ -1,7 +1,13 @@
 package com.portfolio.api.service;
 
 import java.util.ArrayList;
+import java.util.Set;
 
+import javax.json.JsonPatch;
+import javax.json.JsonStructure;
+import javax.json.JsonValue;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.portfolio.api.SpringApplicationContext;
+import com.portfolio.api.dto.ProfileDto;
 import com.portfolio.api.dto.UserDto;
 import com.portfolio.api.entity.ProfileEntity;
 import com.portfolio.api.entity.UserEntity;
@@ -35,14 +44,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDto createUser(UserDto user) throws Exception {
+	public UserDto createUser(UserDto user) throws IllegalArgumentException {
 		try {
 			UserEntity userEntity = new UserEntity();
 			user.setPublicId(utils.generateUUID(20));
 			user.setEncryptedPassword(this.passwordEncoder.encode(user.getPassword()));
 			BeanUtils.copyProperties(user, userEntity);
 			ProfileEntity profileEntity = new ProfileEntity();
-			profileEntity.setPublicId(utils.generateUUID(20));
+			profileEntity.setPublicId(user.getPublicId());
 			profileEntity.setFirstName(user.getFirstName());
 			if (user.getLastName().length() > 0)
 				profileEntity.setLastName(user.getLastName());
@@ -52,8 +61,8 @@ public class UserServiceImpl implements UserService {
 			UserDto returnValue = new UserDto();
 			BeanUtils.copyProperties(userEntity, returnValue);
 			return returnValue;
-		} catch (Exception e) {
-			throw new Exception("something went wrong");
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Invalid Agrument Passed");
 		}
 
 	}
@@ -84,6 +93,52 @@ public class UserServiceImpl implements UserService {
 		UserDto userDto = new UserDto();
 		BeanUtils.copyProperties(entity, userDto);
 		return userDto;
+	}
+
+	@Override
+	public ProfileDto findProfileByUserId(String userId) throws UsernameNotFoundException {
+		ProfileEntity profileEntity = profileRepository.findByPublicId(userId);
+		if (profileEntity == null)
+			throw new UsernameNotFoundException(userId);
+		ModelMapper mapper = new ModelMapper();
+		ProfileDto dto = mapper.map(profileEntity, ProfileDto.class);
+		return dto;
+
+	}
+
+	@Override
+	public void updateProfile(JsonPatch patchDocument, String userid) {
+		ProfileEntity original = profileRepository.findByPublicId(userid); // 1
+		ObjectMapper objectMapper = (ObjectMapper) SpringApplicationContext.getBean("objectMapper");
+
+		// Converts the original user to a JsonStructure
+		JsonStructure target = objectMapper.convertValue(original, JsonStructure.class); // 2
+		// Applies the patch to the original user
+		JsonValue patchedUser = patchDocument.apply(target); // 3
+
+		// Converts the JsonValue to a User instance
+		ProfileEntity modifiedEntity = objectMapper.convertValue(patchedUser, ProfileEntity.class); // 4
+		modifiedEntity.getUser().setFirstName(modifiedEntity.getFirstName());
+		modifiedEntity.getUser().setLastName(modifiedEntity.getLastName());
+
+		// Saves the modified user in the database
+		profileRepository.save(modifiedEntity);
+	}
+
+	@Override
+	public void addFollower(String userId, String followerId) {
+		UserEntity user = userRepository.findByPublicId(userId);
+		UserEntity follower = userRepository.findByPublicId(followerId);
+
+		Set<UserEntity> followers = user.getFollowers();
+		if (!followers.contains(follower)) {
+			followers.add(follower);
+			follower.getFollowing().add(user);
+		} else {
+			followers.remove(follower);
+			follower.getFollowing().remove(user);
+		}
+
 	}
 
 }

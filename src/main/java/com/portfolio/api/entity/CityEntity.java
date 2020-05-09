@@ -1,5 +1,7 @@
 package com.portfolio.api.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,7 +11,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity(name = "cities")
-public class CityEntity {
+public class CityEntity implements Serializable {
+
+	private static final long serialVersionUID = -1216071100392797603L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
