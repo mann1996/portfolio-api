@@ -1,47 +1,27 @@
-package com.portfolio.api.entity;
+package com.portfolio.api.ui.response;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
+public class PostRest {
 
-@Entity(name = "post")
-public class PostEntity implements Serializable {
-
-	private static final long serialVersionUID = -5936426914447550542L;
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	private String title;
 	private String thumbnail = "";
 	private String content;
-	@Column(name = "public")
-	private boolean isPublic = true;
+	private boolean isPublic;
 	private Long likes = 0L;
+	private boolean isLiked = false;
 	private Long views = 0L;
 	private LocalDateTime createdAt = LocalDateTime.now();
 	private LocalDateTime updatedAt = LocalDateTime.now();
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "createdBy")
-	private ProfileEntity createdBy;
-	@ManyToMany(mappedBy = "likedPosts")
-	private Set<UserEntity> likedBy = new HashSet<UserEntity>();
+	private ProfileRest createdBy;
 
-	public Set<UserEntity> getLikedBy() {
-		return likedBy;
+	public boolean getIsLiked() {
+		return isLiked;
 	}
 
-	public void setLikedBy(Set<UserEntity> likedBy) {
-		this.likedBy = likedBy;
+	public void setIsLiked(boolean liked) {
+		this.isLiked = liked;
 	}
 
 	public Integer getId() {
@@ -76,14 +56,6 @@ public class PostEntity implements Serializable {
 		this.content = content;
 	}
 
-	public boolean getIsPublic() {
-		return isPublic;
-	}
-
-	public void setIsPublic(boolean isPublic) {
-		this.isPublic = isPublic;
-	}
-
 	public Long getLikes() {
 		return likes;
 	}
@@ -116,12 +88,20 @@ public class PostEntity implements Serializable {
 		this.updatedAt = updatedAt;
 	}
 
-	public ProfileEntity getCreatedBy() {
+	public ProfileRest getCreatedBy() {
 		return createdBy;
 	}
 
-	public void setCreatedBy(ProfileEntity createdBy) {
+	public void setCreatedBy(ProfileRest createdBy) {
 		this.createdBy = createdBy;
+	}
+
+	public boolean getIsPublic() {
+		return isPublic;
+	}
+
+	public void setIsPublic(boolean isPublic) {
+		this.isPublic = isPublic;
 	}
 
 }

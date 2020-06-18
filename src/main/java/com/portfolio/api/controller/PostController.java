@@ -1,34 +1,191 @@
-//package com.portfolio.api.controller;
-//
-//import java.util.List;
-//
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.PostMapping;
-//import org.springframework.web.bind.annotation.RequestBody;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RestController;
-//
-//import com.portfolio.api.entity.Post;
-//import com.portfolio.api.service.PostService;
-//
-//@RestController
-//@RequestMapping("/api")
-//public class PostController {
-//	@Autowired
-//	private PostService postService;
-//
-//	@GetMapping(value = "/posts")
-//	public ResponseEntity<List<Post>> getPosts() {
-//		ResponseEntity<List<Post>> entity = new ResponseEntity<List<Post>>(postService.getAllPosts(), HttpStatus.OK);
-//		return entity;
-//	}
-//
-//	@PostMapping(value = "/posts/add")
-//	public ResponseEntity<Integer> savePost(@RequestBody Post post) {
-//		Integer id = postService.savePost(post);
-//		return new ResponseEntity<Integer>(id, HttpStatus.CREATED);
-//	}
-//}
+package com.portfolio.api.controller;
+
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.portfolio.api.dto.PostDto;
+import com.portfolio.api.dto.ProfileDto;
+import com.portfolio.api.dto.UserDto;
+import com.portfolio.api.service.PostService;
+import com.portfolio.api.service.UserService;
+import com.portfolio.api.ui.request.EditPostRequest;
+import com.portfolio.api.ui.response.PostRest;
+import com.portfolio.api.ui.response.ProfileRest;
+
+@RestController
+@RequestMapping("/posts")
+public class PostController {
+	@Autowired
+	private PostService postService;
+	@Autowired
+	private UserService userService;
+
+	@PostMapping(value = "/save")
+	public ResponseEntity<Integer> savePost(@RequestBody EditPostRequest post, @RequestParam Integer id,
+			Principal principal) {
+		try {
+			PostDto dto = new PostDto();
+			ModelMapper mapper = new ModelMapper();
+			dto = mapper.map(post, PostDto.class);
+			if (principal != null) {
+				String email = principal.getName();
+				UserDto userDto = userService.findByEmail(email);
+				ProfileDto createdBy = userService.findProfileByUserId(userDto.getPublicId());
+				dto.setCreatedBy(createdBy);
+				if (id != null) {
+					dto.setId(id);
+				}
+				Integer returnValue = postService.savePost(dto);
+				return new ResponseEntity<Integer>(returnValue, HttpStatus.CREATED);
+			} else {
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+			}
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+
+	}
+
+	@GetMapping(value = "/view/{id}")
+	public ResponseEntity<PostRest> findPost(@PathVariable Integer id, Principal principal) {
+		try {
+			PostDto dto = new PostDto();
+			dto = postService.findPost(id);
+			ModelMapper mapper = new ModelMapper();
+			PostRest postRest = mapper.map(dto, PostRest.class);
+			ProfileRest createdBy = mapper.map(dto.getCreatedBy(), ProfileRest.class);
+			postRest.setCreatedBy(createdBy);
+			postRest.setIsLiked(false);
+			if (principal != null) {
+				String email = principal.getName();
+				UserDto userDto = userService.findByEmail(email);
+				if (dto.getLikedBy().contains(userDto))
+					postRest.setIsLiked(true);
+			}
+			return new ResponseEntity<PostRest>(postRest, HttpStatus.OK);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@GetMapping(value = "/user/{userId}/public")
+	public ResponseEntity<List<PostRest>> findPublicPostsByUser(@PathVariable String userId) {
+		try {
+			List<PostDto> dtos = postService.findPublicPostsByUser(userId);
+			ModelMapper mapper = new ModelMapper();
+			List<PostRest> posts = new ArrayList<PostRest>();
+			for (PostDto dto : dtos) {
+				posts.add(mapper.map(dto, PostRest.class));
+			}
+			return new ResponseEntity<List<PostRest>>(posts, HttpStatus.OK);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+		}
+	}
+
+	@GetMapping(value = "/")
+	public ResponseEntity<List<PostRest>> findPublicPosts() {
+		try {
+			List<PostDto> dtos = postService.findPublicPosts();
+			ModelMapper mapper = new ModelMapper();
+			List<PostRest> posts = new ArrayList<PostRest>();
+			for (PostDto dto : dtos) {
+				PostRest post = mapper.map(dto, PostRest.class);
+				post.setCreatedBy(mapper.map(dto.getCreatedBy(), ProfileRest.class));
+				posts.add(post);
+
+			}
+			return new ResponseEntity<List<PostRest>>(posts, HttpStatus.OK);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+		}
+	}
+
+	@DeleteMapping(value = "/delete/{id}")
+	public ResponseEntity<String> deletePost(@PathVariable Integer id) {
+		this.postService.deletePost(id);
+		return new ResponseEntity<String>(HttpStatus.OK);
+	}
+
+	@GetMapping(value = "/toggle/like/{postId}")
+	public ResponseEntity<Long> toggleLike(@PathVariable Integer postId, Principal principal) {
+		try {
+			if (principal != null) {
+				String email = principal.getName();
+				String userId = userService.findByEmail(email).getPublicId();
+				Long likes = postService.toggleLike(userId, postId);
+				return new ResponseEntity<Long>(likes, HttpStatus.OK);
+			}
+			return new ResponseEntity<Long>(HttpStatus.UNAUTHORIZED);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@GetMapping(value = "/add/view/{id}")
+	public ResponseEntity<Long> addView(@PathVariable Integer id) {
+		try {
+			Long views = postService.addView(id);
+			return new ResponseEntity<Long>(views, HttpStatus.OK);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@GetMapping(value = "/search")
+	public ResponseEntity<List<PostRest>> searchPost(@RequestParam String key) {
+		try {
+			List<PostDto> dtos = postService.matchPost(key);
+			ModelMapper mapper = new ModelMapper();
+			List<PostRest> postRests = new ArrayList<PostRest>();
+			for (PostDto postDto : dtos) {
+				PostRest rest = mapper.map(postDto, PostRest.class);
+				ProfileRest createdBy = mapper.map(postDto.getCreatedBy(), ProfileRest.class);
+				rest.setCreatedBy(createdBy);
+				postRests.add(rest);
+			}
+			return new ResponseEntity<List<PostRest>>(postRests, HttpStatus.OK);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@GetMapping(value = "/subscription")
+	public ResponseEntity<List<PostRest>> findBySubscription(Principal principal) {
+		try {
+			if (principal != null) {
+				String email = principal.getName();
+				String userId = userService.findByEmail(email).getPublicId();
+				List<PostDto> dtos = postService.findBySubscription(userId);
+				ModelMapper mapper = new ModelMapper();
+				List<PostRest> postRests = new ArrayList<PostRest>();
+				for (PostDto postDto : dtos) {
+					PostRest rest = mapper.map(postDto, PostRest.class);
+					ProfileRest createdBy = mapper.map(postDto.getCreatedBy(), ProfileRest.class);
+					rest.setCreatedBy(createdBy);
+					postRests.add(rest);
+				}
+				return new ResponseEntity<List<PostRest>>(postRests, HttpStatus.OK);
+			} else {
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+			}
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+	}
+}

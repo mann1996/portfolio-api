@@ -1,34 +1,171 @@
-//package com.portfolio.api.service;
-//
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
-//
-//import com.portfolio.api.entity.Post;
-//import com.portfolio.api.repository.PostRepository;
-//
-//@Service(value = "postService")
-//@Transactional
-//public class PostServiceImpl implements PostService {
-//	private PostRepository postRepository;
-//
-//	public PostServiceImpl(PostRepository postRepository) {
-//		this.postRepository = postRepository;
-//	}
-//
-//	@Override
-//	public List<Post> getAllPosts() {
-//		List<Post> posts = new ArrayList<>();
-//		postRepository.findAll().forEach(posts::add);
-//		return posts;
-//	}
-//
-//	@Override
-//	public Integer savePost(Post post) {
-//		post.getCreatedBy().getPosts().add(post);
-//		Integer id = postRepository.save(post).getId();
-//		return id;
-//	}
-//}
+package com.portfolio.api.service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.portfolio.api.dto.PostDto;
+import com.portfolio.api.dto.ProfileDto;
+import com.portfolio.api.entity.PostEntity;
+import com.portfolio.api.entity.ProfileEntity;
+import com.portfolio.api.entity.UserEntity;
+import com.portfolio.api.repository.PostRepository;
+import com.portfolio.api.repository.SharedRepository;
+import com.portfolio.api.repository.UserRepository;
+
+@Service(value = "postService")
+@Transactional
+public class PostServiceImpl implements PostService {
+	private PostRepository postRepository;
+	private UserRepository userRepository;
+	private SharedRepository sharedRepository;
+
+	public PostServiceImpl(PostRepository postRepository, SharedRepository sharedRepository,
+			UserRepository userRepository) {
+		this.postRepository = postRepository;
+		this.sharedRepository = sharedRepository;
+		this.userRepository = userRepository;
+	}
+
+	@Override
+	public Integer savePost(PostDto post) {
+		Optional<PostEntity> postEntity = postRepository.findById(post.getId());
+		ModelMapper mapper = new ModelMapper();
+		if (!postEntity.isEmpty()) {
+			postEntity.get().setIsPublic(post.getIsPublic());
+			postEntity.get().setTitle(post.getTitle());
+			postEntity.get().setContent(post.getContent());
+			postEntity.get().setThumbnail(post.getThumbnail());
+			postEntity.get().setUpdatedAt(LocalDateTime.now());
+			return postEntity.get().getId();
+		}
+		PostEntity newEntity = mapper.map(post, PostEntity.class);
+		ProfileEntity createdBy = mapper.map(post.getCreatedBy(), ProfileEntity.class);
+		newEntity.setCreatedBy(createdBy);
+		return postRepository.save(newEntity).getId();
+	}
+
+	@Override
+	public PostDto findPost(Integer id) {
+		Optional<PostEntity> postEntity = postRepository.findById(id);
+		ModelMapper mapper = new ModelMapper();
+		if (!postEntity.isEmpty()) {
+			PostDto dto = mapper.map(postEntity.get(), PostDto.class);
+			ProfileDto userDto = mapper.map(postEntity.get().getCreatedBy(), ProfileDto.class);
+			dto.setCreatedBy(userDto);
+			return dto;
+		}
+		return null;
+	}
+
+	@Override
+	public List<PostDto> findPublicPostsByUser(String userId) {
+		List<PostEntity> entities = sharedRepository.findPublicPostsByUser(userId);
+		List<PostDto> dtos = new ArrayList<PostDto>();
+
+		if (!entities.isEmpty()) {
+			ModelMapper mapper = new ModelMapper();
+			for (PostEntity postEntity : entities) {
+				PostDto dto = mapper.map(postEntity, PostDto.class);
+				ProfileDto userDto = mapper.map(postEntity.getCreatedBy(), ProfileDto.class);
+				dto.setCreatedBy(userDto);
+				dtos.add(dto);
+			}
+		}
+		return dtos;
+	}
+
+	@Override
+	public List<PostDto> findPublicPosts() {
+		List<PostEntity> entities = sharedRepository.findPublicPosts();
+		List<PostDto> dtos = new ArrayList<PostDto>();
+
+		if (!entities.isEmpty()) {
+			ModelMapper mapper = new ModelMapper();
+			for (PostEntity postEntity : entities) {
+				PostDto dto = mapper.map(postEntity, PostDto.class);
+				ProfileDto userDto = mapper.map(postEntity.getCreatedBy(), ProfileDto.class);
+				dto.setCreatedBy(userDto);
+				dtos.add(dto);
+			}
+		}
+		return dtos;
+	}
+
+	@Override
+	public void deletePost(Integer id) {
+		Optional<PostEntity> entity = postRepository.findById(id);
+
+		if (!entity.isEmpty()) {
+			entity.get().setCreatedBy(null);
+			postRepository.delete(entity.get());
+		}
+
+	}
+
+	@Override
+	public Long toggleLike(String userId, Integer postId) {
+		UserEntity userEntity = userRepository.findByPublicId(userId);
+		PostEntity postEntity = postRepository.findById(postId).get();
+		Set<UserEntity> likedBy = postEntity.getLikedBy();
+		if (!likedBy.contains(userEntity)) {
+			postEntity.getLikedBy().add(userEntity);
+			postEntity.setLikes(postEntity.getLikes() + 1);
+			userEntity.getLikedPosts().add(postEntity);
+		} else {
+			postEntity.getLikedBy().remove(userEntity);
+			postEntity.setLikes(postEntity.getLikes() - 1);
+			userEntity.getLikedPosts().remove(postEntity);
+		}
+
+		return postEntity.getLikes();
+
+	}
+
+	@Override
+	public Long addView(Integer postId) {
+		PostEntity postEntity = postRepository.findById(postId).get();
+		postEntity.setViews(postEntity.getViews() + 1);
+		return postEntity.getViews();
+	}
+
+	@Override
+	public List<PostDto> matchPost(String key) {
+		List<PostEntity> entities = sharedRepository.matchPost(key);
+		List<PostDto> dtos = new ArrayList<PostDto>();
+		ModelMapper mapper = new ModelMapper();
+		for (PostEntity postEntity : entities) {
+			PostDto dto = mapper.map(postEntity, PostDto.class);
+			ProfileDto createdBy = mapper.map(postEntity.getCreatedBy(), ProfileDto.class);
+			dto.setCreatedBy(createdBy);
+			dtos.add(dto);
+		}
+		return dtos;
+	}
+
+	@Override
+	public List<PostDto> findBySubscription(String userId) {
+		UserEntity entity = userRepository.findByPublicId(userId);
+		Set<UserEntity> following = entity.getFollowing();
+		List<String> userIds = new ArrayList<String>();
+		for (UserEntity userEntity : following) {
+			userIds.add(userEntity.getPublicId());
+		}
+		List<PostEntity> postEntities = sharedRepository.findBySubscription(userIds);
+		List<PostDto> dtos = new ArrayList<PostDto>();
+		ModelMapper mapper = new ModelMapper();
+		for (PostEntity postEntity : postEntities) {
+			PostDto dto = mapper.map(postEntity, PostDto.class);
+			ProfileDto createdBy = mapper.map(postEntity.getCreatedBy(), ProfileDto.class);
+			dto.setCreatedBy(createdBy);
+			dtos.add(dto);
+		}
+		return dtos;
+	}
+}

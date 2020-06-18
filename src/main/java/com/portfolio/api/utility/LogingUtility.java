@@ -16,8 +16,13 @@ public class LogingUtility {
 		logger.error(ex);
 	}
 
-	@AfterThrowing(pointcut = "execution(* com.portfolio.api.repository*.*(..))", throwing = "ex")
+	@AfterThrowing(pointcut = "execution(* com.portfolio.api.repository.*.*(..))", throwing = "ex")
 	public void logRepositoryErrors(Exception ex) throws Exception {
+		logger.error(ex);
+	}
+
+	@AfterThrowing(pointcut = "execution(* com.portfolio.api.controller.*.*(..))", throwing = "ex")
+	public void logControllerErrors(Exception ex) throws Exception {
 		logger.error(ex);
 	}
 }

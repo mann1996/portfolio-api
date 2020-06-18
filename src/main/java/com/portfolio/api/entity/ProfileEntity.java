@@ -35,6 +35,7 @@ public class ProfileEntity implements Serializable {
 	private String github;
 	private String linkedin;
 	private LocalDateTime joinedOn = LocalDateTime.now();
+	private String thumbnail = "";
 
 //	@ManyToOne(cascade = CascadeType.ALL)
 //	@JoinColumn(name = "location")
@@ -186,6 +187,14 @@ public class ProfileEntity implements Serializable {
 
 	public void setUser(UserEntity user) {
 		this.user = user;
+	}
+
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
 	}
 
 }

@@ -32,10 +32,15 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 		http.cors().and().csrf().disable().authorizeRequests()
 				.antMatchers(HttpMethod.POST, WebSecurityConstants.SIGNUP_URL).permitAll()
 				.antMatchers(HttpMethod.POST, "/users/validate").permitAll()
-				.antMatchers(HttpMethod.GET, WebSecurityConstants.PROFILE_URL).permitAll().anyRequest().authenticated()
-				.and().addFilter(this.getAuthenticationFilter())
-				.addFilter(new AuthorizationFilter(authenticationManager())).sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+				.antMatchers(HttpMethod.GET, "/users/search").permitAll()
+				.antMatchers(HttpMethod.GET, WebSecurityConstants.PROFILE_URL).permitAll()
+				.antMatchers(HttpMethod.GET, "/posts/subscription").permitAll().antMatchers(HttpMethod.GET, "/posts/")
+				.permitAll().antMatchers(HttpMethod.GET, "/posts/user/**").permitAll()
+				.antMatchers(HttpMethod.GET, "/posts/search").permitAll()
+				.antMatchers(HttpMethod.GET, "/posts/add/view/**").permitAll()
+				.antMatchers(HttpMethod.GET, "/posts/view/**").permitAll().anyRequest().authenticated().and()
+				.addFilter(this.getAuthenticationFilter()).addFilter(new AuthorizationFilter(authenticationManager()))
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 	}
 
 	@Override

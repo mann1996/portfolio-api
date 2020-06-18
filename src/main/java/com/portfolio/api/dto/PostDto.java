@@ -1,21 +1,26 @@
 package com.portfolio.api.dto;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class PostDto {
+public class PostDto implements Serializable {
+	private static final long serialVersionUID = 733271136757522976L;
 	private Integer id;
 	private String title;
-	private String thumbnail;
+	private String thumbnail = "";
 	private String content;
 	private boolean isPublic;
-	private Long likes;
-	private Long views;
-	private LocalDateTime createdAt;
-	private LocalDateTime updatedAt;
-	private UserDto createdBy;
+	private Long likes = 0L;
+	private Long views = 0L;
+	private LocalDateTime createdAt = LocalDateTime.now();
+	private LocalDateTime updatedAt = LocalDateTime.now();
+	private ProfileDto createdBy;
+	private Set<UserDto> likedBy = new HashSet<UserDto>();
 
 	public Integer getId() {
 		return id;
@@ -49,11 +54,11 @@ public class PostDto {
 		this.content = content;
 	}
 
-	public boolean isPublic() {
+	public boolean getIsPublic() {
 		return isPublic;
 	}
 
-	public void setPublic(boolean isPublic) {
+	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
 
@@ -89,12 +94,20 @@ public class PostDto {
 		this.updatedAt = updatedAt;
 	}
 
-	public UserDto getCreatedBy() {
+	public ProfileDto getCreatedBy() {
 		return createdBy;
 	}
 
-	public void setCreatedBy(UserDto createdBy) {
+	public void setCreatedBy(ProfileDto createdBy) {
 		this.createdBy = createdBy;
+	}
+
+	public Set<UserDto> getLikedBy() {
+		return likedBy;
+	}
+
+	public void setLikedBy(Set<UserDto> likedBy) {
+		this.likedBy = likedBy;
 	}
 
 }

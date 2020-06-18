@@ -1,6 +1,8 @@
 package com.portfolio.api.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.json.JsonPatch;
@@ -23,6 +25,7 @@ import com.portfolio.api.dto.UserDto;
 import com.portfolio.api.entity.ProfileEntity;
 import com.portfolio.api.entity.UserEntity;
 import com.portfolio.api.repository.ProfileRepository;
+import com.portfolio.api.repository.SharedRepository;
 import com.portfolio.api.repository.UserRepository;
 import com.portfolio.api.utility.Utils;
 
@@ -34,13 +37,15 @@ public class UserServiceImpl implements UserService {
 	private ProfileRepository profileRepository;
 	private Utils utils;
 	private BCryptPasswordEncoder passwordEncoder;
+	private SharedRepository sharedRepository;
 
-	public UserServiceImpl(UserRepository userRepository, ProfileRepository profileRepository, Utils utils,
-			BCryptPasswordEncoder passwordEncoder) {
+	public UserServiceImpl(UserRepository userRepository, ProfileRepository profileRepository,
+			SharedRepository sharedRepository, Utils utils, BCryptPasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.profileRepository = profileRepository;
 		this.utils = utils;
 		this.passwordEncoder = passwordEncoder;
+		this.sharedRepository = sharedRepository;
 	}
 
 	@Override
@@ -107,7 +112,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void updateProfile(JsonPatch patchDocument, String userid) {
+	public ProfileDto updateProfile(JsonPatch patchDocument, String userid) {
 		ProfileEntity original = profileRepository.findByPublicId(userid); // 1
 		ObjectMapper objectMapper = (ObjectMapper) SpringApplicationContext.getBean("objectMapper");
 
@@ -123,6 +128,9 @@ public class UserServiceImpl implements UserService {
 
 		// Saves the modified user in the database
 		profileRepository.save(modifiedEntity);
+		ModelMapper mapper = new ModelMapper();
+		return mapper.map(modifiedEntity, ProfileDto.class);
+
 	}
 
 	@Override
@@ -141,4 +149,43 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	@Override
+	public Set<UserDto> getFollowers(String userId) throws UsernameNotFoundException {
+		UserEntity user = userRepository.findByPublicId(userId);
+		if (user == null)
+			throw new UsernameNotFoundException(userId);
+		Set<UserEntity> followers = user.getFollowers();
+		ModelMapper mapper = new ModelMapper();
+		Set<UserDto> returnValue = new HashSet<UserDto>();
+		for (UserEntity follower : followers) {
+			returnValue.add(mapper.map(follower, UserDto.class));
+		}
+		return returnValue;
+	}
+
+	@Override
+	public Set<UserDto> getFollowing(String userId) throws UsernameNotFoundException {
+		UserEntity user = userRepository.findByPublicId(userId);
+		if (user == null)
+			throw new UsernameNotFoundException(userId);
+		Set<UserEntity> followers = user.getFollowing();
+		ModelMapper mapper = new ModelMapper();
+		Set<UserDto> returnValue = new HashSet<UserDto>();
+		for (UserEntity follower : followers) {
+			returnValue.add(mapper.map(follower, UserDto.class));
+		}
+		return returnValue;
+	}
+
+	@Override
+	public List<ProfileDto> matchUser(String key) {
+		List<ProfileEntity> entities = sharedRepository.matchUser(key);
+		ModelMapper mapper = new ModelMapper();
+		List<ProfileDto> dtos = new ArrayList<ProfileDto>();
+		if (entities.size() > 0)
+			for (ProfileEntity entity : entities) {
+				dtos.add(mapper.map(entity, ProfileDto.class));
+			}
+		return dtos;
+	}
 }

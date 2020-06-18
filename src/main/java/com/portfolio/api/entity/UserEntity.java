@@ -44,6 +44,18 @@ public class UserEntity implements Serializable {
 	@JoinTable(name = "user_following", joinColumns = @JoinColumn(name = "follower_user_id"), inverseJoinColumns = @JoinColumn(name = "following_user_id"))
 	private Set<UserEntity> following = new HashSet<UserEntity>();
 
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "user_like", joinColumns = @JoinColumn(name = "liked_by"), inverseJoinColumns = @JoinColumn(name = "liked_posts"))
+	private Set<PostEntity> likedPosts = new HashSet<PostEntity>();
+
+	public Set<PostEntity> getLikedPosts() {
+		return likedPosts;
+	}
+
+	public void setLikedPosts(Set<PostEntity> likedPost) {
+		this.likedPosts = likedPost;
+	}
+
 	public Set<UserEntity> getFollowers() {
 		return followers;
 	}

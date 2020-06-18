@@ -26,6 +26,7 @@ public class ProfileDto implements Serializable {
 	private String soundcloud;
 	private String github;
 	private String linkedin;
+	private String thumbnail = "";
 //	private CityDto location;
 	private LocalDateTime joinedOn = LocalDateTime.now();
 	private UserDto user;
@@ -172,5 +173,13 @@ public class ProfileDto implements Serializable {
 
 	public void setGithub(String github) {
 		this.github = github;
+	}
+
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
 	}
 }

@@ -1,6 +1,9 @@
 package com.portfolio.api.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import javax.json.JsonPatch;
 
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -84,8 +88,18 @@ public class UserController {
 			ProfileDto dto = userService.findProfileByUserId(userId);
 			ModelMapper mapper = new ModelMapper();
 			ProfileRest response = mapper.map(dto, ProfileRest.class);
+			Set<UserDto> followers = userService.getFollowers(userId);
+			Set<UserDto> following = userService.getFollowing(userId);
+			response.setFollowers(followers.size());
+			response.setFollowing(following.size());
 			if (principal != null) {
 				UserDto userDto = userService.findByEmail(principal.getName());
+
+				if (followers.contains(userDto)) {
+					response.setFollowingStatus(true);
+				} else {
+					response.setFollowingStatus(false);
+				}
 				if (userId.equals(userDto.getPublicId())) {
 					response.setValid(true);
 				} else {
@@ -99,14 +113,17 @@ public class UserController {
 	}
 
 	@PatchMapping(path = "/update/profile/{id}", consumes = "application/json-patch+json")
-	public ResponseEntity<String> updateProfile(@PathVariable String id, @RequestBody JsonPatch patch,
+	public ResponseEntity<ProfileRest> updateProfile(@PathVariable String id, @RequestBody JsonPatch patch,
 			Principal principal) {
 		try {
 			if (principal != null) {
 				UserDto userDto = userService.findByEmail(principal.getName());
 				if (id.equals(userDto.getPublicId())) {
-					userService.updateProfile(patch, id);
-					return new ResponseEntity<String>(HttpStatus.OK);
+					ProfileDto dto = userService.updateProfile(patch, id);
+					ModelMapper mapper = new ModelMapper();
+					ProfileRest rest = mapper.map(dto, ProfileRest.class);
+					rest.setValid(true);
+					return new ResponseEntity<ProfileRest>(rest, HttpStatus.OK);
 				}
 			}
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -131,6 +148,25 @@ public class UserController {
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
+	}
+
+	@GetMapping(value = "/search")
+	public ResponseEntity<List<ProfileRest>> searchUser(@RequestParam String key, Principal principal) {
+		List<ProfileDto> dtos = userService.matchUser(key);
+		ModelMapper mapper = new ModelMapper();
+		List<ProfileRest> list = new ArrayList<ProfileRest>();
+
+		UserDto userDto = userService.findByEmail(principal.getName());
+		for (ProfileDto dto : dtos) {
+			ProfileRest profileRest = mapper.map(dto, ProfileRest.class);
+			if (principal != null) {
+				if (dto.getUser().getFollowers().contains(userDto)) {
+					profileRest.setFollowingStatus(true);
+				}
+			}
+			list.add(profileRest);
+		}
+		return new ResponseEntity<List<ProfileRest>>(list, HttpStatus.OK);
 	}
 
 }

@@ -1,5 +1,8 @@
 package com.portfolio.api.service;
 
+import java.util.List;
+import java.util.Set;
+
 import javax.json.JsonPatch;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,7 +20,13 @@ public interface UserService extends UserDetailsService {
 
 	public ProfileDto findProfileByUserId(String userId) throws UsernameNotFoundException;
 
-	public void updateProfile(JsonPatch patchDocument, String userId);
+	public ProfileDto updateProfile(JsonPatch patchDocument, String userId);
 
 	public void addFollower(String userId, String followerId);
+
+	public Set<UserDto> getFollowers(String userId) throws UsernameNotFoundException;
+
+	public Set<UserDto> getFollowing(String userId) throws UsernameNotFoundException;
+
+	public List<ProfileDto> matchUser(String key);
 }

@@ -18,11 +18,30 @@ public class ProfileRest {
 	private String soundcloud;
 	private String github;
 	private String linkedin;
-
+	private String thumbnail = "";
 	private LocalDateTime joinedOn = LocalDateTime.now();
 	private UserRest user;
+
 	private boolean valid = false;
-	private boolean followingStatus;
+	private boolean followingStatus = false;
+	private Integer followers = 0;
+	private Integer following = 0;
+
+	public Integer getFollowers() {
+		return followers;
+	}
+
+	public void setFollowers(Integer followers) {
+		this.followers = followers;
+	}
+
+	public Integer getFollowing() {
+		return following;
+	}
+
+	public void setFollowing(Integer following) {
+		this.following = following;
+	}
 
 	public String getLinkedin() {
 		return linkedin;
@@ -174,6 +193,14 @@ public class ProfileRest {
 
 	public void setFollowingStatus(boolean followingStatus) {
 		this.followingStatus = followingStatus;
+	}
+
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
 	}
 
 }
