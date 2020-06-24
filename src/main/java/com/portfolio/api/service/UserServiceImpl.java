@@ -51,10 +51,10 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto createUser(UserDto user) throws IllegalArgumentException {
 		try {
-			UserEntity userEntity = new UserEntity();
 			user.setPublicId(utils.generateUUID(20));
 			user.setEncryptedPassword(this.passwordEncoder.encode(user.getPassword()));
-			BeanUtils.copyProperties(user, userEntity);
+			ModelMapper mapper = new ModelMapper();
+			UserEntity userEntity = mapper.map(user, UserEntity.class);
 			ProfileEntity profileEntity = new ProfileEntity();
 			profileEntity.setPublicId(user.getPublicId());
 			profileEntity.setFirstName(user.getFirstName());
@@ -63,8 +63,7 @@ public class UserServiceImpl implements UserService {
 			this.userRepository.save(userEntity);
 			profileEntity.setUser(userEntity);
 			this.profileRepository.save(profileEntity);
-			UserDto returnValue = new UserDto();
-			BeanUtils.copyProperties(userEntity, returnValue);
+			UserDto returnValue = mapper.map(userEntity, UserDto.class);
 			return returnValue;
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("Invalid Agrument Passed");

@@ -155,11 +155,10 @@ public class UserController {
 		List<ProfileDto> dtos = userService.matchUser(key);
 		ModelMapper mapper = new ModelMapper();
 		List<ProfileRest> list = new ArrayList<ProfileRest>();
-
-		UserDto userDto = userService.findByEmail(principal.getName());
 		for (ProfileDto dto : dtos) {
 			ProfileRest profileRest = mapper.map(dto, ProfileRest.class);
 			if (principal != null) {
+				UserDto userDto = userService.findByEmail(principal.getName());
 				if (dto.getUser().getFollowers().contains(userDto)) {
 					profileRest.setFollowingStatus(true);
 				}

@@ -7,6 +7,7 @@ import javax.persistence.Query;
 
 import org.springframework.stereotype.Repository;
 
+import com.portfolio.api.entity.CommentEntity;
 import com.portfolio.api.entity.PostEntity;
 import com.portfolio.api.entity.ProfileEntity;
 
@@ -31,8 +32,8 @@ public class SharedRepositoryImpl implements SharedRepository {
 
 	@Override
 	public List<PostEntity> findPublicPostsByUser(String userId) {
-		Query query = em.createQuery(
-				"select p from post p where p.createdBy.publicId = :userId and p.isPublic = true order by p.createdAt desc");
+		Query query = em
+				.createQuery("select p from post p where p.createdBy.publicId = :userId order by p.createdAt desc");
 		query.setParameter("userId", userId);
 		return query.getResultList();
 	}
@@ -55,6 +56,13 @@ public class SharedRepositoryImpl implements SharedRepository {
 		Query query = em
 				.createQuery("select p from post p where p.createdBy.publicId in :users order by p.createdAt desc");
 		query.setParameter("users", users);
+		return query.getResultList();
+	}
+
+	@Override
+	public List<CommentEntity> findByPost(Integer postId) {
+		Query query = em.createQuery("select c from comment c where c.post.id = :post order by c.createdAt desc");
+		query.setParameter("post", postId);
 		return query.getResultList();
 	}
 }

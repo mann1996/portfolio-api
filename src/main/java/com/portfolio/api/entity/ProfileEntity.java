@@ -3,7 +3,6 @@ package com.portfolio.api.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -36,12 +35,7 @@ public class ProfileEntity implements Serializable {
 	private String linkedin;
 	private LocalDateTime joinedOn = LocalDateTime.now();
 	private String thumbnail = "";
-
-//	@ManyToOne(cascade = CascadeType.ALL)
-//	@JoinColumn(name = "location")
-//	private CityEntity location;
-
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne()
 	@JoinColumn(name = "user_id", nullable = false, unique = true)
 	private UserEntity user;
 

@@ -2,7 +2,9 @@ package com.portfolio.api.service;
 
 import java.util.List;
 
+import com.portfolio.api.dto.CommentDto;
 import com.portfolio.api.dto.PostDto;
+import com.portfolio.api.ui.request.CommentRequest;
 
 public interface PostService {
 
@@ -23,4 +25,9 @@ public interface PostService {
 	public List<PostDto> matchPost(String key);
 
 	public List<PostDto> findBySubscription(String userId);
+
+	public CommentDto postComment(CommentRequest comment, String userId);
+
+	public List<CommentDto> getComments(Integer postId);
+
 }

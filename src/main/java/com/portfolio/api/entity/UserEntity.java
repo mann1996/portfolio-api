@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -34,17 +32,13 @@ public class UserEntity implements Serializable {
 	private String email;
 	@Column(name = "password")
 	private String encryptedPassword;
-
-	@OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
-	private Set<PostEntity> posts = new HashSet<>();
-
 	@ManyToMany(mappedBy = "following")
 	private Set<UserEntity> followers = new HashSet<UserEntity>();
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany()
 	@JoinTable(name = "user_following", joinColumns = @JoinColumn(name = "follower_user_id"), inverseJoinColumns = @JoinColumn(name = "following_user_id"))
 	private Set<UserEntity> following = new HashSet<UserEntity>();
 
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany()
 	@JoinTable(name = "user_like", joinColumns = @JoinColumn(name = "liked_by"), inverseJoinColumns = @JoinColumn(name = "liked_posts"))
 	private Set<PostEntity> likedPosts = new HashSet<PostEntity>();
 
@@ -118,14 +112,6 @@ public class UserEntity implements Serializable {
 
 	public void setEncryptedPassword(String encryptedPassword) {
 		this.encryptedPassword = encryptedPassword;
-	}
-
-	public Set<PostEntity> getPosts() {
-		return posts;
-	}
-
-	public void setPosts(Set<PostEntity> posts) {
-		this.posts = posts;
 	}
 
 }

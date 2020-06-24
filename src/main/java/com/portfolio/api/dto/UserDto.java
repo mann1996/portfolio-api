@@ -11,7 +11,7 @@ public class UserDto implements Serializable {
 
 	private static final long serialVersionUID = 2868739908925042014L;
 
-	private Integer id = 0;
+	private Integer id;
 	private String publicId;
 	private String firstName;
 	private String lastName;
@@ -113,7 +113,10 @@ public class UserDto implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return id;
+		if (id != null)
+			return id;
+		else
+			return 0;
 	}
 
 }

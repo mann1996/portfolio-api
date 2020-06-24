@@ -10,27 +10,34 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.portfolio.api.dto.CommentDto;
 import com.portfolio.api.dto.PostDto;
 import com.portfolio.api.dto.ProfileDto;
+import com.portfolio.api.dto.UserDto;
+import com.portfolio.api.entity.CommentEntity;
 import com.portfolio.api.entity.PostEntity;
 import com.portfolio.api.entity.ProfileEntity;
 import com.portfolio.api.entity.UserEntity;
+import com.portfolio.api.repository.CommentRepository;
 import com.portfolio.api.repository.PostRepository;
 import com.portfolio.api.repository.SharedRepository;
 import com.portfolio.api.repository.UserRepository;
+import com.portfolio.api.ui.request.CommentRequest;
 
 @Service(value = "postService")
 @Transactional
 public class PostServiceImpl implements PostService {
 	private PostRepository postRepository;
 	private UserRepository userRepository;
+	private CommentRepository commentRepository;
 	private SharedRepository sharedRepository;
 
 	public PostServiceImpl(PostRepository postRepository, SharedRepository sharedRepository,
-			UserRepository userRepository) {
+			UserRepository userRepository, CommentRepository commentRepository) {
 		this.postRepository = postRepository;
 		this.sharedRepository = sharedRepository;
 		this.userRepository = userRepository;
+		this.commentRepository = commentRepository;
 	}
 
 	@Override
@@ -163,6 +170,37 @@ public class PostServiceImpl implements PostService {
 		for (PostEntity postEntity : postEntities) {
 			PostDto dto = mapper.map(postEntity, PostDto.class);
 			ProfileDto createdBy = mapper.map(postEntity.getCreatedBy(), ProfileDto.class);
+			dto.setCreatedBy(createdBy);
+			dtos.add(dto);
+		}
+		return dtos;
+	}
+
+	@Override
+	public CommentDto postComment(CommentRequest comment, String userId) {
+		PostEntity postEntity = postRepository.findById(comment.getPostId()).get();
+		UserEntity user = userRepository.findByPublicId(userId);
+		ModelMapper mapper = new ModelMapper();
+		CommentEntity commentEntity = new CommentEntity();
+		commentEntity.setContent(comment.getContent());
+		commentEntity.setPost(postEntity);
+		commentEntity.setCreatedBy(user);
+		commentRepository.save(commentEntity);
+		CommentDto dto = mapper.map(commentEntity, CommentDto.class);
+		UserDto createdBy = mapper.map(user, UserDto.class);
+		dto.setCreatedBy(createdBy);
+		return dto;
+	}
+
+	@Override
+	public List<CommentDto> getComments(Integer postId) {
+		List<CommentEntity> comments = sharedRepository.findByPost(postId);
+		ModelMapper mapper = new ModelMapper();
+		List<CommentDto> dtos = new ArrayList<CommentDto>();
+		for (CommentEntity commentEntity : comments) {
+			CommentDto dto = mapper.map(commentEntity, CommentDto.class);
+			dto.setPost(this.findPost(postId));
+			UserDto createdBy = mapper.map(commentEntity.getCreatedBy(), UserDto.class);
 			dto.setCreatedBy(createdBy);
 			dtos.add(dto);
 		}

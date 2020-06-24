@@ -18,14 +18,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.portfolio.api.dto.CommentDto;
 import com.portfolio.api.dto.PostDto;
 import com.portfolio.api.dto.ProfileDto;
 import com.portfolio.api.dto.UserDto;
 import com.portfolio.api.service.PostService;
 import com.portfolio.api.service.UserService;
+import com.portfolio.api.ui.request.CommentRequest;
 import com.portfolio.api.ui.request.EditPostRequest;
+import com.portfolio.api.ui.response.CommentRest;
 import com.portfolio.api.ui.response.PostRest;
 import com.portfolio.api.ui.response.ProfileRest;
+import com.portfolio.api.ui.response.SimpleUserRest;
 
 @RestController
 @RequestMapping("/posts")
@@ -43,9 +47,7 @@ public class PostController {
 			ModelMapper mapper = new ModelMapper();
 			dto = mapper.map(post, PostDto.class);
 			if (principal != null) {
-				String email = principal.getName();
-				UserDto userDto = userService.findByEmail(email);
-				ProfileDto createdBy = userService.findProfileByUserId(userDto.getPublicId());
+				ProfileDto createdBy = userService.findProfileByUserId(this.getCurrentUser(principal));
 				dto.setCreatedBy(createdBy);
 				if (id != null) {
 					dto.setId(id);
@@ -126,8 +128,7 @@ public class PostController {
 	public ResponseEntity<Long> toggleLike(@PathVariable Integer postId, Principal principal) {
 		try {
 			if (principal != null) {
-				String email = principal.getName();
-				String userId = userService.findByEmail(email).getPublicId();
+				String userId = this.getCurrentUser(principal);
 				Long likes = postService.toggleLike(userId, postId);
 				return new ResponseEntity<Long>(likes, HttpStatus.OK);
 			}
@@ -169,8 +170,7 @@ public class PostController {
 	public ResponseEntity<List<PostRest>> findBySubscription(Principal principal) {
 		try {
 			if (principal != null) {
-				String email = principal.getName();
-				String userId = userService.findByEmail(email).getPublicId();
+				String userId = this.getCurrentUser(principal);
 				List<PostDto> dtos = postService.findBySubscription(userId);
 				ModelMapper mapper = new ModelMapper();
 				List<PostRest> postRests = new ArrayList<PostRest>();
@@ -188,4 +188,49 @@ public class PostController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 	}
+
+	@PostMapping(value = "/post/comment")
+	public ResponseEntity<CommentRest> postComment(@RequestBody CommentRequest comment, Principal principal) {
+		try {
+			if (principal != null) {
+				String userId = this.getCurrentUser(principal);
+				CommentDto dto = postService.postComment(comment, userId);
+				ModelMapper mapper = new ModelMapper();
+				CommentRest response = mapper.map(dto, CommentRest.class);
+				ProfileDto profileDto = userService.findProfileByUserId(userId);
+				SimpleUserRest createdBy = mapper.map(profileDto, SimpleUserRest.class);
+				response.setCreatedBy(createdBy);
+				return new ResponseEntity<CommentRest>(response, HttpStatus.CREATED);
+			} else
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+
+	}
+
+	@GetMapping(value = "/comments/{postId}")
+	public ResponseEntity<List<CommentRest>> findCommentsByPost(@PathVariable Integer postId) {
+		try {
+			List<CommentDto> dtos = postService.getComments(postId);
+			List<CommentRest> comments = new ArrayList<CommentRest>();
+			ModelMapper mapper = new ModelMapper();
+			for (CommentDto commentDto : dtos) {
+				CommentRest comment = mapper.map(commentDto, CommentRest.class);
+				ProfileDto profileDto = userService.findProfileByUserId(commentDto.getCreatedBy().getPublicId());
+				SimpleUserRest createdBy = mapper.map(profileDto, SimpleUserRest.class);
+				comment.setCreatedBy(createdBy);
+				comments.add(comment);
+			}
+			return new ResponseEntity<List<CommentRest>>(comments, HttpStatus.OK);
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	private String getCurrentUser(Principal principal) {
+		String email = principal.getName();
+		return userService.findByEmail(email).getPublicId();
+	}
+
 }
