@@ -1,6 +1,6 @@
 # portfolio-api
 # Rest Api code for behance clone
-Created with eclipse and spring boot
+Created with eclipse and spring boot (Maven project)
 
 # Features
 - Crud operations
