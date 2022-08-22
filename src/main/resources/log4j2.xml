@@ -4,7 +4,7 @@
 	<Appenders>
 
 		<!-- File Appender -->
-		<File name="FileAppender" fileName="logs/ErrorLog.log">
+		<File name="FileAppender" fileName="logs/error.log">
 			<PatternLayout
 				pattern="%d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n" />
 		</File>

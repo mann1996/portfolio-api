@@ -4,13 +4,15 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
-@Entity(name = "profile")
+@Entity(name="profile")
+@Table(name = "profiles")
 public class ProfileEntity implements Serializable {
 
 	private static final long serialVersionUID = 4767746605850858850L;
